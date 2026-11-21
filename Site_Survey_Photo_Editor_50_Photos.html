@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#10253e">
+  <title>Site Survey Report Builder | One Job - Many Photos</title>
+  <style>
+    :root { --ink:#14253e; --muted:#63748a; --line:#dce5ee; --teal:#087d7c; --bg:#f1f5f9; --soft:#e9f5f4; --paper:#fff; --gold:#d8a54b; --red:#b84247; }
+    * { box-sizing:border-box; }
+    html { scroll-behavior:smooth; }
+    body { font-family: "Noto Sans Thai", "Leelawadee UI", Tahoma, Arial, sans-serif; color:var(--ink); background:var(--bg); margin:0; font-size:14px; line-height:1.55; }
+    button,input,textarea,select { font:inherit; }
+    button { cursor:pointer; }
+    .topbar { background:var(--ink); color:#fff; padding:17px clamp(16px,3vw,42px); display:flex; justify-content:space-between; align-items:center; gap:14px; flex-wrap:wrap; position:relative; z-index:4; }
+    .brand { display:flex; gap:13px; align-items:center; }
+    .brand-mark { width:42px; height:42px; border:2px solid #58b8b1; border-radius:12px; display:grid; place-items:center; font-weight:900; font-size:22px; color:#fff; }
+    .brand strong { display:block; font-size:18px; letter-spacing:.2px; }
+    .brand small { display:block; color:#b8c8d9; font-size:12px; }
+    .top-actions { display:flex; flex-wrap:wrap; align-items:center; gap:9px; }
+    .btn { border:1px solid transparent; display:inline-flex; justify-content:center; align-items:center; gap:7px; border-radius:10px; font-weight:700; padding:10px 14px; transition:background .15s,transform .15s; background:#fff; color:var(--ink); white-space:nowrap; }
+    .btn:active { transform:translateY(1px); }
+    .btn.primary { background:var(--teal); color:white; }
+    .btn.primary:hover { background:#086f6f; }
+    .btn.secondary { background:#ebf2f6; color:var(--ink); border-color:#d9e5ee; }
+    .btn.secondary:hover { background:#dcecf3; }
+    .btn.on-dark { background:#203a54; border-color:#38536e; color:#fff; }
+    .btn.on-dark:hover { background:#2c4b68; }
+    .btn.danger { color:var(--red); background:#fff4f4; }
+    .btn.small { padding:6px 10px; font-size:12px; border-radius:8px; }
+    .btn:disabled { opacity:.55; cursor:not-allowed; }
+    .workspace { max-width:1740px; margin:0 auto; display:grid; grid-template-columns:minmax(340px,1.04fr) minmax(350px,.96fr); gap:20px; padding:22px; align-items:start; }
+    .editor { display:flex; flex-direction:column; gap:16px; min-width:0; }
+    .panel { background:white; border:1px solid var(--line); border-radius:16px; box-shadow:0 4px 20px rgba(26,49,78,.04); overflow:hidden; }
+    .panel-head { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; padding:19px 21px 13px; }
+    .panel-head h2 { margin:0; font-size:17px; }
+    .panel-head p { margin:4px 0 0; color:var(--muted); font-size:12px; }
+    .panel-body { padding:0 21px 21px; }
+    .pill { color:#0a7775; background:#e9f8f5; font-size:12px; font-weight:800; padding:5px 10px; border-radius:999px; }
+    .field-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+    .field.span2 { grid-column:1 / -1; }
+    .field label { font-size:12px; font-weight:800; display:block; margin-bottom:6px; color:#465972; }
+    .field input,.field textarea,.field select { display:block; width:100%; background:#fafcfe; color:var(--ink); border:1px solid #d8e3ed; border-radius:9px; padding:10px 11px; outline:none; min-width:0; }
+    .field input:focus,.field textarea:focus,.field select:focus { border-color:var(--teal); box-shadow:0 0 0 3px rgba(8,125,124,.11); }
+    .field textarea { resize:vertical; min-height:73px; }
+    .sections { display:flex; flex-direction:column; gap:13px; }
+    .section-card { border:1px solid var(--line); border-radius:13px; overflow:hidden; }
+    .section-head { display:flex; justify-content:space-between; gap:12px; align-items:center; padding:13px 14px; background:#f3f7fb; border-bottom:1px solid var(--line); }
+    .section-num { background:var(--ink); color:#fff; font-weight:900; font-size:12px; border-radius:8px; padding:6px 10px; flex:none; }
+    .section-head b { font-size:14px; margin-right:auto; }
+    .section-tools { display:flex; align-items:center; flex-wrap:wrap; gap:5px; }
+    .section-content { padding:15px; display:flex; flex-direction:column; gap:13px; }
+    .photos-bar { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:8px; }
+    .photos-bar strong { font-size:13px; }
+    .photo-actions { display:flex; flex-wrap:wrap; gap:7px; }
+    .pick-btn { display:inline-flex; align-items:center; position:relative; overflow:hidden; font-weight:800; font-size:12px; padding:8px 11px; border-radius:9px; border:1px solid #cae1df; background:#eff8f7; color:#087471; cursor:pointer; }
+    .pick-btn input { position:absolute; inset:0; opacity:0; cursor:pointer; font-size:300px; }
+    .thumb-list { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
+    .thumb { border:1px solid var(--line); border-radius:10px; padding:9px; min-width:0; background:#fcfdff; }
+    .thumb img { width:100%; height:135px; object-fit:contain; border-radius:7px; background:#edf2f6; display:block; }
+    .thumb-meta { display:flex; justify-content:space-between; align-items:center; margin:9px 0 7px; gap:6px; }
+    .thumb-meta span { font-weight:800; color:#526579; font-size:11px; }
+    .thumb textarea { width:100%; min-height:64px; resize:vertical; border:1px solid #d5e0e9; border-radius:8px; padding:8px; font-size:12px; }
+    .thumb-controls { display:flex; gap:4px; }
+    .empty-photos { padding:24px; border:1.5px dashed #c6d6e4; border-radius:10px; text-align:center; color:#7b8c9e; background:#fbfdff; font-size:12px; }
+    .help { color:var(--muted); font-size:12px; margin:0; }
+    .tip { margin:0 21px 20px; padding:12px 14px; background:var(--soft); border-left:3px solid var(--teal); border-radius:7px; color:#316863; font-size:12px; }
+    .preview-wrap { position:sticky; top:14px; min-width:0; }
+    .preview-toolbar { display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:11px; padding:0 3px; }
+    .preview-toolbar strong { font-size:16px; }
+    .preview-toolbar small { color:var(--muted); }
+    .preview-scroll { overflow:auto; max-height:calc(100vh - 85px); border:1px solid #dce5ed; border-radius:12px; box-shadow:0 8px 26px rgba(15,40,65,.08); background:#dfe7ef; padding:14px; }
+    .sheet { background:white; max-width:210mm; margin:0 auto; padding:28px 32px 36px; box-shadow:0 2px 12px rgba(20,42,63,.09); min-width:0; }
+    .report-kicker { color:var(--teal); text-transform:uppercase; letter-spacing:2.4px; font-weight:900; font-size:10px; }
+    .report-titlebar { border-bottom:3px solid var(--ink); padding-bottom:18px; margin-bottom:18px; display:flex; justify-content:space-between; align-items:start; gap:20px; }
+    .report-titlebar h1 { font-size:24px; line-height:1.25; margin:8px 0; color:#14253e; overflow-wrap:anywhere; }
+    .report-titlebar .subtitle { color:#5b6e82; font-size:11px; margin:0; }
+    .report-badge { border-radius:8px; background:#e6f2f1; color:#0f7370; font-weight:900; padding:10px; font-size:12px; min-width:72px; text-align:center; }
+    .report-meta { display:grid; grid-template-columns:1fr 1fr; border:1px solid #dfe6eb; border-radius:9px; overflow:hidden; margin-bottom:16px; }
+    .meta-cell { padding:9px 11px; border-bottom:1px solid #e5eaef; min-width:0; }
+    .meta-cell:nth-child(odd) { border-right:1px solid #e5eaef; }
+    .meta-cell:nth-last-child(-n+2) { border-bottom:0; }
+    .meta-cell label { display:block; color:#8291a0; font-size:9px; font-weight:900; margin-bottom:3px; text-transform:uppercase; letter-spacing:.35px; }
+    .meta-cell div { color:#172d43; font-size:11px; white-space:pre-wrap; overflow-wrap:anywhere; }
+    .summary-strip { display:grid; grid-template-columns:repeat(3,1fr); margin:14px 0 21px; gap:8px; }
+    .metric { background:#f1f5f8; padding:11px; border-radius:8px; }
+    .metric strong { display:block; font-size:19px; color:var(--ink); line-height:1.15; }
+    .metric span { display:block; color:#698093; font-size:10px; margin-top:3px; }
+    .report-section { margin-top:23px; }
+    .report-sec-head { display:flex; align-items:start; gap:10px; padding-bottom:9px; border-bottom:1px solid #dfe7ec; margin-bottom:11px; break-after:avoid; }
+    .report-sec-num { width:34px; height:34px; border-radius:8px; display:grid; place-items:center; background:var(--ink); color:white; font-weight:900; flex:none; }
+    .report-sec-head h2 { margin:0; font-size:15px; line-height:1.5; overflow-wrap:anywhere; }
+    .report-status { font-size:9px; font-weight:700; color:#087b77; margin-top:2px; }
+    .detail-row { display:grid; grid-template-columns:75px 1fr; gap:9px; margin:6px 0; font-size:11px; break-inside:avoid; }
+    .detail-row b { color:#52677d; }
+    .detail-row p { margin:0; white-space:pre-wrap; overflow-wrap:anywhere; }
+    .photo-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; margin-top:13px; }
+    .report-photo { break-inside:avoid; page-break-inside:avoid; border:1px solid #dfe6ed; border-radius:8px; overflow:hidden; min-width:0; background:white; }
+    .report-photo img { display:block; width:100%; height:185px; object-fit:contain; background:#f1f5f9; }
+    .photo-caption { padding:8px 10px 10px; font-size:10px; color:#334b62; line-height:1.55; white-space:pre-wrap; overflow-wrap:anywhere; }
+    .photo-caption strong { display:block; font-size:9px; color:#087976; margin-bottom:3px; }
+    .report-conclusion { margin-top:24px; padding-top:14px; border-top:2px solid var(--ink); }
+    .report-conclusion h3 { margin:0 0 9px; font-size:14px; }
+    .report-conclusion .note { font-size:11px; margin:10px 0; white-space:pre-wrap; overflow-wrap:anywhere; }
+    .report-conclusion .note b { display:block; color:#4c6779; margin-bottom:3px; }
+    .report-sign { margin-top:30px; display:flex; justify-content:flex-end; }
+    .report-sign div { border-top:1px solid #9cabba; padding-top:8px; min-width:185px; text-align:center; font-size:10px; color:#52667b; }
+    .report-footer { display:flex; justify-content:space-between; margin-top:28px; padding-top:9px; border-top:1px solid #dce4ec; font-size:9px; color:#8090a2; }
+    .notice { display:none; position:fixed; bottom:19px; left:50%; transform:translateX(-50%); padding:12px 17px; border-radius:10px; color:white; background:#203950; z-index:50; box-shadow:0 5px 30px #233b5260; max-width:min(480px,92vw); text-align:center; font-size:13px; }
+    .status-text { font-size:12px; color:#bdd0de; display:flex; gap:5px; align-items:center; }
+    .status-dot { width:7px;height:7px;border-radius:50%;background:#85d9b6;display:inline-block; }
+    [hidden] { display:none !important; }
+    @media (max-width:1090px) { .workspace { grid-template-columns:1fr; max-width:880px; padding:14px; } .preview-wrap { position:static; } .preview-scroll { max-height:none; } }
+    @media (max-width:560px) { .topbar { padding:14px; } .brand strong { font-size:15px; } .brand-mark { width:36px;height:36px; } .top-actions .btn { font-size:12px;padding:9px 11px; } .workspace { padding:10px;gap:12px; } .panel-head { padding:15px; } .panel-body { padding:0 15px 15px; } .field-grid { gap:10px; } .field label { font-size:11px; } .field input,.field textarea,.field select { padding:9px 8px; font-size:13px; } .section-head { flex-wrap:wrap; } .section-head b { flex:1; } .section-tools { width:100%; justify-content:flex-end; } .thumb-list { grid-template-columns:1fr; } .preview-scroll { padding:5px; } .sheet { padding:18px 13px 24px; } .report-titlebar h1 { font-size:19px; } .report-titlebar { gap:8px; } .report-photo img { height:125px; } .photo-grid { gap:7px; } .detail-row { grid-template-columns:69px 1fr; gap:5px; } .meta-cell { padding:7px; } .tip { margin:0 15px 15px; } }
+    .shared-description { padding:13px; border:1px solid #b8ded9; background:#f0faf8; border-radius:10px; }
+    .shared-description label { color:#08736e; font-size:13px; }
+    .shared-description textarea { background:#fff; min-height:118px; line-height:1.65; }
+    .shared-description .help { margin-top:8px; color:#41776e; }
+    .optional-tag { display:inline-block; font-size:10px; font-weight:800; background:#d7eeeb; color:#0a716c; padding:2px 6px; border-radius:99px; margin-left:5px; }
+    .photo-count { font-size:12px; font-weight:600; color:#087d7c; }
+    .report-job-description { background:#eef8f6; border-left:3px solid #087d7c; padding:10px 12px; border-radius:0 7px 7px 0; margin:10px 0 9px; break-inside:avoid; }
+    .report-job-description strong { color:#08736e; font-size:10px; display:block; margin-bottom:3px; }
+    .report-job-description p { font-size:11px; line-height:1.75; margin:0; white-space:pre-wrap; overflow-wrap:anywhere; }
+    .report-photo-set-title { display:flex; justify-content:space-between; gap:8px; margin:15px 0 0; font-size:11px; font-weight:800; color:#455b73; padding-bottom:5px; border-bottom:1px solid #dce7e9; break-after:avoid; }
+    .report-photo-set-title span { color:#087d7c; font-size:10px; }
+    .photo-caption span { display:block; }
+    @media print {
+      .report-job-description p { font-size:10pt; }
+      .report-job-description strong { font-size:8.5pt; }
+      .report-photo-set-title { font-size:9pt; }
+    }
+    @page {
+      size:A4;
+      margin:13mm 12mm 16mm;
+      @bottom-left { content:"SITE SURVEY REPORT"; color:#8090a2; font-size:8pt; }
+      @bottom-right { content:"หน้า " counter(page) " / " counter(pages); color:#8090a2; font-size:8pt; }
+    }
+    @media print {
+      html,body { background:white !important; margin:0; padding:0; font-size:11pt; print-color-adjust:exact; -webkit-print-color-adjust:exact; }
+      .topbar,.workspace>.editor,.preview-toolbar,.notice { display:none !important; }
+      .workspace { display:block; margin:0; padding:0; max-width:none; }
+      .preview-wrap,.preview-scroll { position:static; max-height:none; overflow:visible; border:0; padding:0; background:white; box-shadow:none; }
+      .sheet { max-width:none; margin:0; padding:0; box-shadow:none; }
+      .report-titlebar h1 { font-size:23pt; }
+      .report-meta .meta-cell div { font-size:10pt; }
+      .report-section { margin-top:19px; }
+      .report-sec-head h2 { font-size:13pt; }
+      .report-sec-head { break-after:avoid; }
+      .detail-row,.report-conclusion .note { font-size:9.5pt; }
+      .report-photo img { height:63mm; max-height:63mm; }
+      .photo-caption { font-size:9pt; }
+      .photo-caption strong { font-size:8pt; }
+      .photo-grid { gap:3mm; }
+      .report-photo { break-inside:avoid; }
+      .report-conclusion,.report-sign { break-inside:avoid; }
+      .report-footer { display:none; }
+    }
+/* Photo drawing editor — touch and mouse */
+.thumb img.editable-photo {cursor:zoom-in}
+.draw-overlay {position:fixed;inset:0;z-index:2000;background:#071c31d9;display:flex;align-items:center;justify-content:center;padding:10px}
+.draw-dialog {width:min(1080px,100%);height:min(900px,calc(100dvh - 20px));min-height:0;display:flex;flex-direction:column;background:white;border-radius:14px;overflow:hidden}
+.draw-head {padding:10px 13px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:8px}
+.draw-head h2 {font-size:16px;margin:0}
+.draw-head small {color:var(--muted)}
+.draw-controls {padding:9px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:#f8fafc;border-bottom:1px solid var(--line)}
+.draw-tools {display:flex;gap:5px;overflow-x:auto;max-width:100%}
+.draw-tool {padding:8px 10px;border-radius:8px;background:white;color:var(--ink);border:1px solid #ccd8e4;font-weight:700;white-space:nowrap}
+.draw-tool.active {background:var(--teal);color:white;border-color:var(--teal)}
+.draw-colors {display:flex;gap:7px;align-items:center}
+.draw-swatch {width:28px;height:28px;border-radius:50%;background:var(--swatch);border:2px solid white;box-shadow:0 0 0 1px #9caab8;padding:0}
+.draw-swatch.active {box-shadow:0 0 0 3px var(--ink)}
+.draw-controls label {display:flex;gap:6px;align-items:center;font-size:12px;font-weight:bold}
+.draw-controls input[type=range] {width:95px;accent-color:var(--teal)}
+.draw-stage {flex:1;min-height:130px;display:flex;justify-content:center;align-items:center;overflow:hidden;background:#e6edf2;padding:7px}
+#annotateCanvas {display:block;max-width:100%;max-height:100%;width:auto;height:auto;touch-action:none;cursor:crosshair;background:white;box-shadow:0 2px 15px #18324a66}
+.draw-bottom {display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;padding:9px;border-top:1px solid var(--line)}
+.draw-bottom>div {display:flex;gap:6px;flex-wrap:wrap}
+.draw-hint {font-size:11px;color:var(--muted);text-align:center;padding:0 7px 7px}
+.painted-tag {display:inline-block;color:#08756e;background:#e0f6ef;padding:2px 6px;border-radius:30px;font-size:10px}
+@media(max-width:650px){.draw-overlay{padding:0}.draw-dialog{width:100vw;height:100dvh;border-radius:0}.draw-head{padding:8px}.draw-head h2{font-size:14px}.draw-controls{padding:6px;gap:7px}.draw-tools{width:100%}.draw-tool{padding:7px 9px;font-size:12px}.draw-stage{padding:3px}.draw-bottom{padding:7px}.draw-bottom .btn{font-size:12px;padding:8px 10px}}
+@media print {.draw-overlay{display:none!important}}
+
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand"><div class="brand-mark">S</div><div><strong>Site Survey Studio</strong><small>1 งาน • 1 คำอธิบายหลัก • หลายรูปภาพ</small></div></div>
+    <div class="top-actions">
+      <span class="status-text"><i class="status-dot"></i><span id="saveStatus">กำลังโหลดข้อมูล...</span></span>
+      <button type="button" class="btn on-dark" id="backupBtn">สำรองงาน JSON</button>
+      <button type="button" class="btn on-dark" id="restoreBtn">นำเข้างาน</button>
+      <input type="file" id="restoreInput" accept="application/json,.json" hidden>
+      <button type="button" class="btn primary" id="pdfBtn">บันทึกเป็น PDF</button>
+    </div>
+  </header>
+
+  <main class="workspace">
+    <div class="editor">
+      <section class="panel">
+        <div class="panel-head"><div><h2>01 / ข้อมูลโครงการ</h2><p>กรอกครั้งเดียว ระบบจะนำไปจัดหน้ารายงานอัตโนมัติ</p></div><span class="pill">PROJECT INFO</span></div>
+        <div class="panel-body field-grid" id="projectFields">
+          <div class="field span2"><label>ชื่อโครงการ / ชื่องาน</label><input data-key="project" placeholder="เช่น Relocate Control Panel"></div>
+          <div class="field"><label>ลูกค้า / บริษัท</label><input data-key="customer" placeholder="ชื่อลูกค้า"></div>
+          <div class="field"><label>สถานที่ / พื้นที่หน้างาน</label><input data-key="location" placeholder="เช่น Building A, Floor 2"></div>
+          <div class="field"><label>วันที่สำรวจ</label><input data-key="surveyDate" type="date"></div>
+          <div class="field"><label>ผู้สำรวจ / ผู้จัดทำ</label><input data-key="surveyor" placeholder="ชื่อ-นามสกุล"></div>
+          <div class="field"><label>เลขที่เอกสาร</label><input data-key="documentNo" placeholder="SSR-001"></div>
+          <div class="field"><label>ผู้ประสานงาน / ติดต่อ</label><input data-key="contact" placeholder="ชื่อ / เบอร์โทร"></div>
+          <div class="field span2"><label>วัตถุประสงค์การสำรวจ</label><textarea data-key="objective" placeholder="เช่น ตรวจสอบจุดย้ายตู้ พื้นที่ติดตั้งใหม่ แนวเดินสาย และรายการที่ต้องเตรียมก่อนดำเนินงาน"></textarea></div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head"><div><h2>02 / รายการงานและรูปประกอบ</h2><p>1 งาน เขียนคำอธิบายรวม 1 ครั้ง แล้วแนบรูปประกอบได้ 1–50 รูป</p></div><span class="pill" id="sectionCount">0 งาน</span></div>
+        <div class="panel-body"><div class="sections" id="sectionEditor"></div><button type="button" class="btn primary" id="addSectionBtn" style="width:100%;margin-top:13px">+ เพิ่มงานใหม่</button></div>
+        <p class="tip">ตัวอย่าง: <b>งาน 1 — สำรวจตู้ Control Panel เดิม</b> เขียนคำอธิบายงานไว้ด้านบน แล้วแนบภาพด้านหน้า ด้านข้าง ภายในตู้ และจุดเข้าสายรวมกันได้ 4 รูป โดยไม่ต้องพิมพ์คำอธิบายซ้ำทุกรูป</p>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head"><div><h2>03 / สรุปและข้อเสนอแนะ</h2><p>ใช้สรุปงานที่ต้องเตรียมก่อนเริ่ม Relocate</p></div></div>
+        <div class="panel-body field-grid" id="summaryFields">
+          <div class="field span2"><label>สรุปผลการสำรวจ</label><textarea data-key="conclusion" placeholder="สรุปสภาพหน้างาน ความพร้อม และสิ่งที่ตรวจพบ"></textarea></div>
+          <div class="field span2"><label>งานที่ต้องดำเนินการ / ข้อเสนอแนะ</label><textarea data-key="recommendation" placeholder="เช่น ตรวจสอบขนาดสายไฟ / ยืนยันจุดติดตั้งใหม่ / เตรียมแผน Shutdown"></textarea></div>
+          <div class="field span2"><label>หมายเหตุอื่น ๆ</label><textarea data-key="remarks" placeholder="ข้อจำกัดด้านเวลา / การเข้าพื้นที่ / ผู้รับผิดชอบ เป็นต้น"></textarea></div>
+        </div>
+      </section>
+      <section class="panel"><div class="panel-head"><div><h2>การจัดเก็บข้อมูล</h2><p>ระบบพยายามบันทึกอัตโนมัติไว้ในเบราว์เซอร์ของเครื่องนี้</p></div></div><div class="panel-body"><p class="help">แนะนำให้กด <b>สำรองงาน JSON</b> หลังใส่รูปเสร็จ เพื่อเก็บข้อมูลและรูปทั้งหมดในไฟล์เดียว แล้วนำกลับมาแก้ไขได้ ไม่ต้องเชื่อมต่ออินเทอร์เน็ต ข้อมูลไม่ได้อัปโหลดไปเซิร์ฟเวอร์</p><button type="button" class="btn danger small" id="resetBtn" style="margin-top:12px">ล้างข้อมูลเริ่มรายงานใหม่</button></div></section>
+    </div>
+
+    <aside class="preview-wrap">
+      <div class="preview-toolbar"><div><strong>ตัวอย่างรายงาน PDF</strong><br><small>A4 • จัดหน้าอัตโนมัติ • พร้อมพิมพ์</small></div><button class="btn secondary small" id="printBtn">ตัวอย่าง / พิมพ์ PDF</button></div>
+      <div class="preview-scroll"><article class="sheet" id="report"></article></div>
+    </aside>
+  </main>
+<div class="draw-overlay" id="photoEditor" role="dialog" aria-modal="true" aria-labelledby="drawTitle" hidden>
+ <div class="draw-dialog">
+  <div class="draw-head"><div><h2 id="drawTitle">✏️ เปิดรูปและขีดเขียน</h2><small id="drawSubtitle">วาดบนรูปด้วยเมาส์หรือนิ้ว</small></div><button type="button" class="btn secondary small" id="drawCloseBtn">✕ ปิด</button></div>
+  <div class="draw-controls">
+   <div class="draw-tools">
+    <button type="button" class="draw-tool active" data-draw-tool="pen">✎ ปากกา</button>
+    <button type="button" class="draw-tool" data-draw-tool="arrow">➜ ลูกศร</button>
+    <button type="button" class="draw-tool" data-draw-tool="rect">▢ กรอบ</button>
+    <button type="button" class="draw-tool" data-draw-tool="ellipse">◯ วงกลม</button>
+    <button type="button" class="draw-tool" data-draw-tool="text">T ข้อความ</button>
+   </div>
+   <div class="draw-colors">
+    <button type="button" class="draw-swatch active" data-draw-color="#e11d48" style="--swatch:#e11d48" aria-label="แดง"></button>
+    <button type="button" class="draw-swatch" data-draw-color="#facc15" style="--swatch:#facc15" aria-label="เหลือง"></button>
+    <button type="button" class="draw-swatch" data-draw-color="#22c55e" style="--swatch:#22c55e" aria-label="เขียว"></button>
+    <button type="button" class="draw-swatch" data-draw-color="#2563eb" style="--swatch:#2563eb" aria-label="น้ำเงิน"></button>
+    <button type="button" class="draw-swatch" data-draw-color="#171717" style="--swatch:#171717" aria-label="ดำ"></button>
+    <button type="button" class="draw-swatch" data-draw-color="#ffffff" style="--swatch:#ffffff" aria-label="ขาว"></button>
+   </div>
+   <label>ขนาดเส้น <input type="range" min="2" max="24" value="7" id="drawSize"><span id="drawSizeValue">7</span></label>
+  </div>
+  <div class="draw-stage"><canvas id="annotateCanvas" aria-label="พื้นที่วาดรูป"></canvas></div>
+  <div class="draw-bottom">
+   <div><button type="button" class="btn secondary small" id="drawUndoBtn">↶ ย้อนกลับ</button><button type="button" class="btn secondary small" id="drawRedoBtn">↷ ทำซ้ำ</button><button type="button" class="btn danger small" id="drawClearBtn">ลบเส้นทั้งหมด</button></div>
+   <div><button type="button" class="btn secondary" id="drawCancelBtn">ยกเลิก</button><button type="button" class="btn primary" id="drawSaveBtn">✓ บันทึกรูปที่วาด</button></div>
+  </div>
+  <div class="draw-hint">แตะหรือคลิกภาพเพื่อขีดเขียน • รูปที่บันทึกจะปรากฏใน PDF และสำรองข้อมูล JSON</div>
+ </div>
+</div>
+
+  <div class="notice" id="toast" role="status"></div>
+
+<script>
+(function () {
+  'use strict';
+  const STORAGE_KEY = 'site-survey-report-v1';
+  const MAX_PHOTOS = 50; // จำนวนภาพสูงสุดต่อ 1 งาน (ปรับเลขนี้ได้)
+  const fields = ['project','customer','location','surveyDate','surveyor','documentNo','contact','objective','conclusion','recommendation','remarks'];
+  const defaultDate = () => { const d = new Date(); return new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,10); };
+  const blankSection = (title='') => ({ id: cryptoId(), title, description:'', status:'สำรวจแล้ว', observation:'', action:'', photos:[] });
+  function cryptoId(){ return (typeof crypto!=='undefined' && crypto.randomUUID) ? crypto.randomUUID() : String(Date.now())+Math.random().toString(36).slice(2); }
+  const defaults = () => ({ project:'Relocate Control Panel', customer:'', location:'', surveyDate:defaultDate(), surveyor:'', documentNo:'SSR-001', contact:'', objective:'', conclusion:'', recommendation:'', remarks:'', sections:[blankSection('ตำแหน่งตู้ Control Panel เดิม'),blankSection('ตำแหน่งติดตั้งตู้ใหม่และแนวเดินสาย')] });
+  let state = defaults();
+  let saveTimer, previewTimer, toastTimer, db, savedOkay=false;
+  const el = id => document.getElementById(id);
+  const safe = v => String(v == null ? '' : v).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const readable = v => String(v || '').trim() || '—';
+  const validImage = s => typeof s==='string' && /^data:image\/(jpeg|png|webp);base64,/i.test(s);
+  const asString = v => typeof v==='string' ? v : '';
+  function toast(text) { const n=el('toast'); n.textContent=text; n.style.display='block'; clearTimeout(toastTimer); toastTimer=setTimeout(()=>n.style.display='none',3500); }
+  function normalize(obj) {
+    const base=defaults(); if(!obj || typeof obj!=='object') return base;
+    fields.forEach(k=>base[k]=asString(obj[k]));
+    base.sections=Array.isArray(obj.sections) ? obj.sections.slice(0,60).map(section=>({
+      id:asString(section?.id)||cryptoId(), title:asString(section?.title), description:asString(section?.description), status:asString(section?.status)||'สำรวจแล้ว', observation:asString(section?.observation), action:asString(section?.action),
+      photos:Array.isArray(section?.photos) ? section.photos.slice(0,MAX_PHOTOS).filter(p=>validImage(p?.data)).map(p=>({id:asString(p.id)||cryptoId(),name:asString(p.name),data:p.data,caption:asString(p.caption),editedData:validImage(p.editedData)?p.editedData:'',marks:Array.isArray(p.marks)?p.marks.slice(0,300):[]})) : []
+    })) : base.sections;
+    return base;
+  }
+  function connectDb(){
+    return new Promise((resolve,reject)=>{
+      if(!('indexedDB' in window)) return reject(Error('IndexedDB unavailable'));
+      const req=indexedDB.open('SiteSurveyStudioDB',1);
+      req.onupgradeneeded=()=>{ if(!req.result.objectStoreNames.contains('reports')) req.result.createObjectStore('reports'); };
+      req.onsuccess=()=>resolve(req.result);
+      req.onerror=()=>reject(req.error);
+    });
+  }
+  function dbGet(){return new Promise((resolve,reject)=>{const tr=db.transaction('reports','readonly'); const q=tr.objectStore('reports').get(STORAGE_KEY); q.onsuccess=()=>resolve(q.result);q.onerror=()=>reject(q.error);});}
+  function dbPut(data){return new Promise((resolve,reject)=>{const tr=db.transaction('reports','readwrite');tr.objectStore('reports').put(data,STORAGE_KEY);tr.oncomplete=resolve;tr.onerror=()=>reject(tr.error);});}
+  async function init(){
+    try { db=await connectDb(); const old=await dbGet(); if(old) state=normalize(old); savedOkay=true; el('saveStatus').textContent='บันทึกอัตโนมัติ'; }
+    catch(err){
+      console.warn('Storage unavailable',err);
+      try { const old=localStorage.getItem(STORAGE_KEY); if(old) state=normalize(JSON.parse(old)); }catch(_){}
+      el('saveStatus').textContent='สำรองงานด้วย JSON';
+      toast('เบราว์เซอร์นี้อาจไม่บันทึกรูปอัตโนมัติ กรุณาสำรองงานเป็น JSON');
+    }
+    updateFields(); renderEditor(); renderPreview();
+  }
+  function updateFields(){ document.querySelectorAll('input[data-key],textarea[data-key]').forEach(n=>{n.value=state[n.dataset.key]||'';}); }
+  function scheduleSave(){
+    el('saveStatus').textContent='กำลังบันทึก...'; clearTimeout(saveTimer);
+    saveTimer=setTimeout(async()=>{
+      try { if(db) await dbPut(state); else {
+        // Small text-only fallback; images must be saved through JSON backup.
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({...state,sections:state.sections.map(s=>({...s,photos:[]}))}));
+      }
+        savedOkay=true;el('saveStatus').textContent=db?'บันทึกอัตโนมัติแล้ว':'สำรองรูปด้วย JSON';
+      } catch(err){savedOkay=false; el('saveStatus').textContent='บันทึกไม่สำเร็จ';toast('พื้นที่บันทึกไม่พอ กรุณากดสำรองงาน JSON');console.error(err);}
+    },650);
+  }
+  function schedulePreview(){clearTimeout(previewTimer); previewTimer=setTimeout(renderPreview,250);}
+  const photoSrc = p => validImage(p?.editedData) ? p.editedData : p.data;
+  function renderEditor(){
+    el('sectionCount').textContent=state.sections.length+' งาน';
+    el('sectionEditor').innerHTML=state.sections.map((s,i)=>`
+      <div class="section-card" data-index="${i}">
+        <div class="section-head"><span class="section-num">งาน ${i+1}</span><b>${safe(s.title||'งานใหม่')}</b><div class="section-tools">
+          <button type="button" class="btn small secondary" data-act="up" data-i="${i}" title="เลื่อนงานขึ้น" ${i===0?'disabled':''}>↑</button>
+          <button type="button" class="btn small secondary" data-act="down" data-i="${i}" title="เลื่อนงานลง" ${i===state.sections.length-1?'disabled':''}>↓</button>
+          <button type="button" class="btn small danger" data-act="remove-section" data-i="${i}">ลบงาน</button>
+        </div></div>
+        <div class="section-content">
+          <div class="field"><label>ชื่องานที่ ${i+1}</label><input data-skey="title" data-i="${i}" value="${safe(s.title)}" placeholder="เช่น สำรวจตู้ Control Panel เดิมก่อน Relocate"></div>
+          <div class="field shared-description"><label>📝 คำอธิบายรวมของงานนี้ <span class="optional-tag">ใช้กับรูปทุกภาพ</span></label><textarea data-skey="description" data-i="${i}" rows="4" placeholder="เช่น งานสำรวจตู้ Control Panel เดิม เพื่อวางแผนถอดย้ายไปยังตำแหน่งใหม่ ตรวจสอบขนาดตู้ จุดเข้าสาย พื้นที่ติดตั้ง และแนวเดินสายเดิม โดยใช้รูปภาพด้านล่างเป็นหลักฐานประกอบทั้งหมด">${safe(s.description)}</textarea><p class="help">ข้อความนี้จะปรากฏเพียงครั้งเดียวในรายงาน PDF ก่อนรูปภาพทั้งหมดของงานนี้ ไม่ต้องเขียนซ้ำทีละรูป</p></div>
+          <div class="field-grid">
+            <div class="field"><label>สถานะ</label><select data-skey="status" data-i="${i}">${['สำรวจแล้ว','รอตรวจสอบเพิ่มเติม','ต้องแก้ไข','รอดำเนินการ','เสร็จสิ้น'].map(x=>`<option value="${x}" ${s.status===x?'selected':''}>${x}</option>`).join('')}</select></div>
+            <div class="field"><label>ข้อสังเกต / ข้อจำกัด</label><input data-skey="observation" data-i="${i}" value="${safe(s.observation)}" placeholder="เช่น พื้นที่จำกัด"></div>
+            <div class="field span2"><label>สิ่งที่ต้องเตรียม / แนวทางดำเนินการ</label><textarea data-skey="action" data-i="${i}" placeholder="เช่น ปลดสายไฟเดิมก่อนย้าย / สำรวจระยะสาย">${safe(s.action)}</textarea></div>
+          </div>
+          <div class="photos-bar"><strong>รูปประกอบของงานที่ ${i+1} <span class="photo-count">(${s.photos.length}/${MAX_PHOTOS} รูป)</span></strong><div class="photo-actions">
+            <label class="pick-btn" ${s.photos.length>=MAX_PHOTOS?'style="opacity:.5"':''}>+ เลือกรูป<input type="file" accept="image/*" multiple data-photo-input="gallery" data-i="${i}" ${s.photos.length>=MAX_PHOTOS?'disabled':''}></label>
+            <label class="pick-btn" ${s.photos.length>=MAX_PHOTOS?'style="opacity:.5"':''}>📷 ถ่ายรูป<input type="file" accept="image/*" capture="environment" data-photo-input="camera" data-i="${i}" ${s.photos.length>=MAX_PHOTOS?'disabled':''}></label>
+          </div></div>
+          ${s.photos.length ? `<div class="thumb-list">${s.photos.map((p,j)=>`
+            <div class="thumb"><img class="editable-photo" loading="lazy" decoding="async" src="${photoSrc(p)}" data-act="edit-photo" data-i="${i}" data-j="${j}" alt="รูป ${j+1} แตะเพื่อขีดเขียน" title="แตะเพื่อเปิดรูปและขีดเขียน" role="button" tabindex="0">
+              <div class="thumb-meta"><span>รูปที่ ${j+1} ${p.marks?.length?'<small class="painted-tag">วาดแล้ว</small>':''}</span><div class="thumb-controls">
+                <button type="button" class="btn small secondary" data-act="edit-photo" data-i="${i}" data-j="${j}">✏️ ขีดเขียน</button>
+                <button type="button" class="btn small secondary" data-act="photo-left" data-i="${i}" data-j="${j}" title="สลับรูปก่อนหน้า" ${j===0?'disabled':''}>←</button>
+                <button type="button" class="btn small secondary" data-act="photo-right" data-i="${i}" data-j="${j}" title="สลับรูปถัดไป" ${j===s.photos.length-1?'disabled':''}>→</button>
+                <button type="button" class="btn small danger" data-act="remove-photo" data-i="${i}" data-j="${j}" title="ลบรูปนี้">×</button>
+              </div></div><textarea data-pcaption="true" data-i="${i}" data-j="${j}" placeholder="หมายเหตุเฉพาะรูปที่ ${j+1} (ไม่บังคับ) เช่น จุดเข้าสายด้านล่าง">${safe(p.caption)}</textarea>
+            </div>`).join('')}</div>` : '<div class="empty-photos">ยังไม่มีรูปประกอบงานนี้ — เพิ่มได้หลายรูปพร้อมกันและใช้คำอธิบายงานเดียวกัน</div>'}
+          <p class="help">แตะรูปหรือกด ✏️ ขีดเขียน เพื่อวงจุดสำคัญ วาดลูกศร หรือใส่ข้อความบนรูป • รูปที่วาดแล้วจะแสดงใน PDF • เมื่อแนบรูปจำนวนมาก แนะนำให้กดสำรองงาน JSON และแบ่งรายงานหาก PDF ใหญ่เกินไป</p>
+        </div>
+      </div>`).join('') || '<div class="empty-photos">ยังไม่มีรายการงาน กดปุ่มด้านล่างเพื่อเริ่ม</div>';
+  }
+  function displayDate(str){if(!/^\d{4}-\d{2}-\d{2}$/.test(str||'')) return readable(str); const [y,m,d]=str.split('-').map(Number); const dt=new Date(y,m-1,d); return isNaN(dt.getTime())?'—':new Intl.DateTimeFormat('th-TH',{day:'numeric',month:'long',year:'numeric'}).format(dt);}
+  function row(label,value){return String(value||'').trim()?`<div class="detail-row"><b>${safe(label)}</b><p>${safe(value)}</p></div>`:'';}
+  function renderPreview(){
+    const photosCount=state.sections.reduce((a,s)=>a+s.photos.length,0);
+    const metadata=[['ชื่อลูกค้า / บริษัท',state.customer],['สถานที่สำรวจ',state.location],['วันที่สำรวจ',displayDate(state.surveyDate)],['ผู้สำรวจ / ผู้จัดทำ',state.surveyor],['เลขที่เอกสาร',state.documentNo],['ผู้ประสานงาน',state.contact]];
+    const sections=state.sections.map((s,i)=>`
+      <section class="report-section"><div class="report-sec-head"><span class="report-sec-num">${String(i+1).padStart(2,'0')}</span><div><h2>${safe(s.title||'งานที่ '+(i+1))}</h2><div class="report-status">สถานะ: ${safe(s.status)}</div></div></div>
+        ${s.description.trim()?`<div class="report-job-description"><strong>รายละเอียดงาน (คำอธิบายรวม)</strong><p>${safe(s.description)}</p></div>`:''}${row('ข้อสังเกต',s.observation)}${row('การดำเนินการ',s.action)}
+        ${s.photos.length?`<div class="report-photo-set-title">รูปภาพประกอบงานที่ ${i+1} <span>${s.photos.length} รูป</span></div><div class="photo-grid">${s.photos.map((p,j)=>`<figure class="report-photo" style="margin:0"><img src="${photoSrc(p)}" alt="ภาพที่ ${i+1}.${j+1}"><figcaption class="photo-caption"><strong>ภาพที่ ${i+1}.${j+1}</strong>${p.caption.trim()?`<span>${safe(p.caption)}</span>`:''}</figcaption></figure>`).join('')}</div>`:''}
+      </section>`).join('');
+    el('report').innerHTML=`
+      <div class="report-titlebar"><div><div class="report-kicker">Engineering Site Inspection</div><h1>${safe(state.project||'รายงานสำรวจหน้างาน')}</h1><p class="subtitle">SITE SURVEY &amp; FIELD INSPECTION REPORT</p></div><div class="report-badge">SITE<br>SURVEY</div></div>
+      <div class="report-meta">${metadata.map(([k,v])=>`<div class="meta-cell"><label>${safe(k)}</label><div>${safe(readable(v))}</div></div>`).join('')}</div>
+      ${row('วัตถุประสงค์',state.objective)}
+      <div class="summary-strip"><div class="metric"><strong>${state.sections.length}</strong><span>รายการงาน</span></div><div class="metric"><strong>${photosCount}</strong><span>รูปภาพประกอบ</span></div><div class="metric"><strong>${state.sections.filter(s=>s.status==='สำรวจแล้ว'||s.status==='เสร็จสิ้น').length}</strong><span>งานที่สำรวจแล้ว / เสร็จสิ้น</span></div></div>
+      ${sections||'<p style="color:#78899c">ยังไม่มีรายการงาน</p>'}
+      ${(state.conclusion||state.recommendation||state.remarks)?`<section class="report-conclusion"><h3>สรุปผลการสำรวจและข้อเสนอแนะ</h3>${[['สรุปผลการสำรวจ',state.conclusion],['งานที่ต้องดำเนินการ / ข้อเสนอแนะ',state.recommendation],['หมายเหตุเพิ่มเติม',state.remarks]].filter(a=>a[1].trim()).map(([k,v])=>`<div class="note"><b>${safe(k)}</b>${safe(v)}</div>`).join('')}</section>`:''}
+      <div class="report-sign"><div>ผู้จัดทำรายงาน<br><strong>${safe(state.surveyor||'................................................')}</strong></div></div>
+      <footer class="report-footer"><span>Site Survey &amp; Inspection Report</span><span>${safe(state.documentNo||'FIELD REPORT')} • ${safe(displayDate(state.surveyDate))}</span></footer>
+    `;
+  }
+  async function compressPhoto(file){
+    if(!file.type.startsWith('image/')) throw Error('ไฟล์นี้ไม่ใช่รูปภาพ');
+    if(file.size>35*1024*1024) throw Error('รูปภาพขนาดใหญ่เกิน 35 MB');
+    const data=await new Promise((resolve,reject)=>{ const fr=new FileReader(); fr.onload=()=>resolve(fr.result); fr.onerror=()=>reject(Error('อ่านรูปไม่สำเร็จ')); fr.readAsDataURL(file); });
+    const picture=await new Promise((resolve,reject)=>{const im=new Image(); im.onload=()=>resolve(im);im.onerror=()=>reject(Error('เปิดรูปไม่สำเร็จ'));im.src=data;});
+    const max=1600; const ratio=Math.min(1,max/Math.max(picture.naturalWidth,picture.naturalHeight));
+    const canvas=document.createElement('canvas'); canvas.width=Math.max(1,Math.round(picture.naturalWidth*ratio));canvas.height=Math.max(1,Math.round(picture.naturalHeight*ratio));
+    const ctx=canvas.getContext('2d',{alpha:false}); if(!ctx) throw Error('ไม่รองรับการย่อรูป');ctx.fillStyle='#ffffff';ctx.fillRect(0,0,canvas.width,canvas.height);ctx.drawImage(picture,0,0,canvas.width,canvas.height);
+    return canvas.toDataURL('image/jpeg',.82);
+  }
+  async function addPhotos(files,index,input){
+    const section=state.sections[index];if(!section)return;
+    const left=MAX_PHOTOS-section.photos.length;
+    if(!left){toast('แต่ละงานใส่ได้ไม่เกิน '+MAX_PHOTOS+' รูป');return;}
+    const batch=Array.from(files).slice(0,left);
+    if(files.length>left) toast('รับภาพเฉพาะ '+left+' รูปแรก (สูงสุด '+MAX_PHOTOS+' รูปต่องาน)');
+    const btn=input.closest('label');if(btn)btn.style.pointerEvents='none';
+    el('saveStatus').textContent='กำลังเตรียมรูปภาพ...';
+    let count=0;
+    for(const file of batch){
+      try {const data=await compressPhoto(file);section.photos.push({id:cryptoId(),name:file.name,data,caption:'',editedData:'',marks:[]});count++;}
+      catch(err){toast('ข้าม '+file.name+': '+err.message);}
+    }
+    if(btn)btn.style.pointerEvents='';
+    if(count){renderEditor();renderPreview();scheduleSave();toast('เพิ่มรูป '+count+' รูปเรียบร้อยแล้ว');}
+    else el('saveStatus').textContent=savedOkay?'บันทึกอัตโนมัติ':'โปรดสำรองงาน JSON';
+  }
+  function onEdit(e){
+    const t=e.target;
+    if(t.dataset.key){state[t.dataset.key]=t.value;scheduleSave();schedulePreview();}
+    else if(t.dataset.skey){const i=+t.dataset.i;if(!state.sections[i])return;state.sections[i][t.dataset.skey]=t.value; if(t.dataset.skey==='title'){ const b=t.closest('.section-card')?.querySelector('.section-head b');if(b)b.textContent=t.value||'งานใหม่';}scheduleSave();schedulePreview();}
+    else if(t.dataset.pcaption){const photo=state.sections[+t.dataset.i]?.photos[+t.dataset.j];if(photo){photo.caption=t.value;scheduleSave();schedulePreview();}}
+  }
+  function onSectionAction(e){
+    const t=e.target.closest('[data-act]'); if(!t)return;
+    const i=+t.dataset.i,j=+t.dataset.j,s=state.sections[i];if(!s)return;
+    if(t.dataset.act==='edit-photo'){openPhotoEditor(i,j);return;}
+    switch(t.dataset.act){
+      case 'up': if(i>0)[state.sections[i-1],state.sections[i]]=[state.sections[i],state.sections[i-1]];break;
+      case 'down': if(i<state.sections.length-1)[state.sections[i+1],state.sections[i]]=[state.sections[i],state.sections[i+1]];break;
+      case 'remove-section': if(!confirm('ลบงานที่ '+(i+1)+' พร้อมรูปภาพทั้งหมดในงานนี้?'))return;state.sections.splice(i,1);break;
+      case 'photo-left': if(j>0)[s.photos[j-1],s.photos[j]]=[s.photos[j],s.photos[j-1]];break;
+      case 'photo-right': if(j<s.photos.length-1)[s.photos[j+1],s.photos[j]]=[s.photos[j],s.photos[j+1]];break;
+      case 'remove-photo': if(!confirm('ลบรูปที่ '+(j+1)+'?'))return;s.photos.splice(j,1);break;
+      default:return;
+    }
+    renderEditor();renderPreview();scheduleSave();
+  }
+  // Store editable drawing marks and an image flattened for printing/PDF.
+  // Original p.data remains unchanged, so deleting all marks restores it.
+  const drawingCanvas=el('annotateCanvas'), drawingCtx=drawingCanvas.getContext('2d');
+  const drawingBase=document.createElement('canvas'), drawingBaseCtx=drawingBase.getContext('2d');
+  let photoEdit=null;
+  function drawCoords(e){
+    const r=drawingCanvas.getBoundingClientRect();
+    return {x:Math.max(0,Math.min(drawingCanvas.width,(e.clientX-r.left)*drawingCanvas.width/r.width)),y:Math.max(0,Math.min(drawingCanvas.height,(e.clientY-r.top)*drawingCanvas.height/r.height))};
+  }
+  function renderMark(ctx,m){
+    ctx.save();ctx.lineWidth=Math.max(1,Number(m.width)||4);ctx.strokeStyle=m.color||'#e11d48';ctx.fillStyle=m.color||'#e11d48';ctx.lineCap='round';ctx.lineJoin='round';
+    if(m.type==='pen'){
+      const pts=m.points||[];
+      if(pts.length){ctx.beginPath();ctx.moveTo(pts[0].x,pts[0].y);for(let i=1;i<pts.length;i++)ctx.lineTo(pts[i].x,pts[i].y);if(pts.length===1)ctx.lineTo(pts[0].x+.1,pts[0].y+.1);ctx.stroke();}
+    }else if(m.type==='arrow'){
+      const angle=Math.atan2(m.y2-m.y1,m.x2-m.x1),len=Math.max(12,Math.min(ctx.lineWidth*4,Math.hypot(m.x2-m.x1,m.y2-m.y1)*.38));
+      ctx.beginPath();ctx.moveTo(m.x1,m.y1);ctx.lineTo(m.x2,m.y2);ctx.moveTo(m.x2-len*Math.cos(angle-.55),m.y2-len*Math.sin(angle-.55));ctx.lineTo(m.x2,m.y2);ctx.lineTo(m.x2-len*Math.cos(angle+.55),m.y2-len*Math.sin(angle+.55));ctx.stroke();
+    }else if(m.type==='rect')ctx.strokeRect(m.x1,m.y1,m.x2-m.x1,m.y2-m.y1);
+    else if(m.type==='ellipse'){
+      const rx=Math.abs(m.x2-m.x1)/2,ry=Math.abs(m.y2-m.y1)/2;
+      if(rx>.01&&ry>.01){ctx.beginPath();ctx.ellipse((m.x1+m.x2)/2,(m.y1+m.y2)/2,rx,ry,0,0,Math.PI*2);ctx.stroke();}
+    }else if(m.type==='text'){
+      const sz=Math.max(20,Number(m.fontSize)||42),txt=String(m.text||'').slice(0,100);
+      ctx.font='bold '+sz+'px "Noto Sans Thai",Tahoma,Arial,sans-serif';ctx.textBaseline='top';
+      ctx.strokeStyle='rgba(255,255,255,.98)';ctx.lineWidth=Math.max(3,sz*.12);ctx.strokeText(txt,m.x,m.y,drawingCanvas.width-m.x-3);ctx.fillText(txt,m.x,m.y,drawingCanvas.width-m.x-3);
+    }
+    ctx.restore();
+  }
+  function refreshDrawing(){
+    if(!photoEdit?.image)return;
+    drawingBaseCtx.clearRect(0,0,drawingBase.width,drawingBase.height);
+    drawingBaseCtx.drawImage(photoEdit.image,0,0,drawingBase.width,drawingBase.height);
+    photoEdit.marks.forEach(m=>renderMark(drawingBaseCtx,m));
+    el('drawUndoBtn').disabled=!photoEdit.marks.length;el('drawRedoBtn').disabled=!photoEdit.redo.length;
+    previewDrawing();
+  }
+  function previewDrawing(){
+    if(!photoEdit?.image)return;
+    drawingCtx.clearRect(0,0,drawingCanvas.width,drawingCanvas.height);
+    drawingCtx.drawImage(drawingBase,0,0);
+    if(photoEdit.pending)renderMark(drawingCtx,photoEdit.pending);
+  }
+  function drawMenu(){
+    if(!photoEdit)return;
+    document.querySelectorAll('[data-draw-tool]').forEach(b=>b.classList.toggle('active',b.dataset.drawTool===photoEdit.tool));
+    document.querySelectorAll('[data-draw-color]').forEach(b=>b.classList.toggle('active',b.dataset.drawColor===photoEdit.color));
+    el('drawSize').value=photoEdit.width;el('drawSizeValue').textContent=photoEdit.width;
+  }
+  async function openPhotoEditor(i,j){
+    const p=state.sections[i]?.photos[j];if(!p||photoEdit)return;
+    const edit={i,j,image:null,marks:Array.isArray(p.marks)?JSON.parse(JSON.stringify(p.marks)):[],redo:[],pending:null,tool:'pen',color:'#e11d48',width:7,changed:false,pointer:null};
+    photoEdit=edit;el('photoEditor').hidden=false;document.body.style.overflow='hidden';
+    el('drawSubtitle').textContent='งาน '+(i+1)+' • รูปที่ '+(j+1)+' • วาดด้วยนิ้วหรือเมาส์';drawMenu();
+    try{
+      const image=new Image();
+      await new Promise((res,rej)=>{image.onload=res;image.onerror=()=>rej(Error('เปิดรูปไม่สำเร็จ'));image.src=p.data;});
+      if(photoEdit!==edit)return;
+      edit.image=image;drawingCanvas.width=image.naturalWidth;drawingCanvas.height=image.naturalHeight;
+      drawingBase.width=drawingCanvas.width;drawingBase.height=drawingCanvas.height;
+      refreshDrawing();
+    }catch(err){toast(err.message);closePhotoEditor(true);}
+  }
+  function closePhotoEditor(force=false){
+    if(!photoEdit)return;
+    if(!force&&photoEdit.changed&&!confirm('ยกเลิกภาพที่ขีดเขียนโดยยังไม่บันทึก?'))return;
+    photoEdit=null;el('photoEditor').hidden=true;document.body.style.overflow='';
+  }
+  function commitDrawing(mark){
+    if(!photoEdit)return;
+    photoEdit.marks.push(mark);photoEdit.redo=[];photoEdit.changed=true;refreshDrawing();
+  }
+  drawingCanvas.addEventListener('pointerdown',e=>{
+    if(!photoEdit?.image||photoEdit.pointer!==null)return;
+    e.preventDefault();const p=drawCoords(e);
+    if(photoEdit.tool==='text'){
+      const txt=prompt('ใส่ข้อความที่ต้องการเขียนบนรูป เช่น จุดย้ายตู้ / สายไฟเดิม','');
+      if(txt?.trim())commitDrawing({type:'text',x:p.x,y:p.y,text:txt.trim().slice(0,100),color:photoEdit.color,fontSize:Math.max(28,Math.round(drawingCanvas.width*.042))});
+      return;
+    }
+    photoEdit.pointer=e.pointerId;try{drawingCanvas.setPointerCapture(e.pointerId);}catch(_){}
+    const m={type:photoEdit.tool,color:photoEdit.color,width:photoEdit.width*drawingCanvas.width/1200};
+    if(m.type==='pen')m.points=[p];else Object.assign(m,{x1:p.x,y1:p.y,x2:p.x,y2:p.y});
+    photoEdit.pending=m;previewDrawing();
+  });
+  drawingCanvas.addEventListener('pointermove',e=>{
+    if(!photoEdit?.pending||e.pointerId!==photoEdit.pointer)return;
+    e.preventDefault();const p=drawCoords(e),m=photoEdit.pending;
+    if(m.type==='pen'){
+      const last=m.points[m.points.length-1];if(Math.hypot(last.x-p.x,last.y-p.y)>.6)m.points.push(p);
+    }else{m.x2=p.x;m.y2=p.y;}
+    previewDrawing();
+  });
+  drawingCanvas.addEventListener('pointerup',e=>{
+    if(!photoEdit?.pending||e.pointerId!==photoEdit.pointer)return;
+    e.preventDefault();const m=photoEdit.pending,p=drawCoords(e);
+    if(m.type==='pen')m.points.push(p);else{m.x2=p.x;m.y2=p.y;}
+    photoEdit.pending=null;photoEdit.pointer=null;
+    try{drawingCanvas.releasePointerCapture(e.pointerId);}catch(_){}
+    if(m.type==='pen'||Math.hypot(m.x2-m.x1,m.y2-m.y1)>3)commitDrawing(m);else previewDrawing();
+  });
+  drawingCanvas.addEventListener('pointercancel',e=>{
+    if(photoEdit?.pointer!==e.pointerId)return;
+    photoEdit.pointer=null;photoEdit.pending=null;previewDrawing();
+  });
+  el('photoEditor').addEventListener('click',e=>{
+    if(!photoEdit)return;
+    const tool=e.target.closest('[data-draw-tool]'),color=e.target.closest('[data-draw-color]');
+    if(tool){photoEdit.tool=tool.dataset.drawTool;drawMenu();}
+    if(color){photoEdit.color=color.dataset.drawColor;drawMenu();}
+  });
+  el('drawSize').addEventListener('input',e=>{
+    if(photoEdit){photoEdit.width=Number(e.target.value);el('drawSizeValue').textContent=e.target.value;}
+  });
+  el('drawUndoBtn').addEventListener('click',()=>{
+    if(photoEdit?.marks.length){photoEdit.redo.push(photoEdit.marks.pop());photoEdit.changed=true;refreshDrawing();}
+  });
+  el('drawRedoBtn').addEventListener('click',()=>{
+    if(photoEdit?.redo.length){photoEdit.marks.push(photoEdit.redo.pop());photoEdit.changed=true;refreshDrawing();}
+  });
+  el('drawClearBtn').addEventListener('click',()=>{
+    if(!photoEdit?.marks.length||!confirm('ลบเส้นและข้อความทั้งหมดในรูปนี้? (รูปต้นฉบับยังอยู่)'))return;
+    photoEdit.marks=[];photoEdit.redo=[];photoEdit.changed=true;refreshDrawing();
+  });
+  el('drawSaveBtn').addEventListener('click',()=>{
+    if(!photoEdit?.image)return;
+    const {i,j,marks}=photoEdit,p=state.sections[i]?.photos[j];if(!p)return;
+    try{
+      photoEdit.pending=null;refreshDrawing();
+      p.editedData=marks.length?drawingCanvas.toDataURL('image/jpeg',.9):'';
+      p.marks=JSON.parse(JSON.stringify(marks));
+      closePhotoEditor(true);renderEditor();renderPreview();scheduleSave();
+      toast('บันทึกภาพที่ขีดเขียนแล้ว จะแสดงใน PDF ด้วย');
+    }catch(err){toast('บันทึกรูปไม่สำเร็จ: '+err.message);console.error(err);}
+  });
+  el('drawCloseBtn').addEventListener('click',()=>closePhotoEditor());
+  el('drawCancelBtn').addEventListener('click',()=>closePhotoEditor());
+  document.addEventListener('keydown',e=>{
+    if(!el('photoEditor').hidden){
+      if(e.key==='Escape'){closePhotoEditor();return;}
+      if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='z'){
+        e.preventDefault();el(e.shiftKey?'drawRedoBtn':'drawUndoBtn').click();
+      }
+    }
+  });
+  el('sectionEditor').addEventListener('keydown',e=>{
+    if(e.target.matches('img[data-act="edit-photo"]')&&(e.key==='Enter'||e.key===' ')){
+      e.preventDefault();openPhotoEditor(+e.target.dataset.i,+e.target.dataset.j);
+    }
+  });
+
+  function backup(){
+    const json=JSON.stringify({schema:'site-survey-v1',savedAt:new Date().toISOString(),report:state});
+    const blob=new Blob([json],{type:'application/json;charset=utf-8'});const url=URL.createObjectURL(blob);
+    const a=document.createElement('a'); a.href=url;a.download='Site_Survey_Backup_'+(state.surveyDate||defaultDate())+'.json';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),2000);
+    toast('ดาวน์โหลดไฟล์สำรองข้อมูลและรูปทั้งหมดแล้ว');
+  }
+  async function restore(file){
+    if(!file)return;
+    try {const parsed=JSON.parse(await file.text());if(!parsed || parsed.schema!=='site-survey-v1' || !parsed.report) throw Error('รูปแบบไฟล์ไม่ถูกต้อง');
+      if(!confirm('นำเข้างานนี้แทนรายงานที่เปิดอยู่? (แนะนำให้สำรองงานเดิมก่อน)'))return;
+      state=normalize(parsed.report);updateFields();renderEditor();renderPreview();scheduleSave();toast('นำเข้ารายงานเรียบร้อย');
+    }catch(err){toast('นำเข้าไม่สำเร็จ: '+err.message);}
+  }
+  function printPdf(){
+    renderPreview();
+    const safeName=(state.project||'Site_Survey').replace(/[\\/:*?"<>|]/g,' ').trim().slice(0,60);
+    document.title=(safeName||'Site_Survey')+' - Site Survey Report';
+    window.print();
+  }
+  document.addEventListener('input',onEdit);
+  document.addEventListener('change',e=>{const t=e.target;
+    if(t.dataset.photoInput){addPhotos(t.files,+t.dataset.i,t);}
+    else if(t.dataset.skey||t.dataset.key)onEdit(e);
+  });
+  el('sectionEditor').addEventListener('click',onSectionAction);
+  el('addSectionBtn').addEventListener('click',()=>{if(state.sections.length>=60){toast('จำกัดสูงสุด 60 งาน');return;}state.sections.push(blankSection());renderEditor();renderPreview();scheduleSave();const last=el('sectionEditor').lastElementChild;last?.scrollIntoView({behavior:'smooth',block:'center'});});
+  el('backupBtn').addEventListener('click',backup);
+  el('restoreBtn').addEventListener('click',()=>el('restoreInput').click());
+  el('restoreInput').addEventListener('change',e=>{restore(e.target.files[0]);e.target.value='';});
+  el('pdfBtn').addEventListener('click',printPdf);
+  el('printBtn').addEventListener('click',printPdf);
+  el('resetBtn').addEventListener('click',()=>{if(!confirm('ยืนยันล้างข้อมูลรายงานปัจจุบันทั้งหมด? คุณควรสำรองงาน JSON ก่อนล้าง'))return;state=defaults();updateFields();renderEditor();renderPreview();scheduleSave();toast('เริ่มรายงานใหม่แล้ว');});
+  init();
+})();
+</script>
+</body>
+</html>
